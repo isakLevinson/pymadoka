@@ -5,15 +5,10 @@ from asyncio.exceptions import CancelledError
 from asyncio.futures import Future
 import logging                                    
 
- 
 import subprocess
 import sys
 from enum import Enum
-
-
 from bleak import BleakClient, BleakScanner
-from bleak.discovery import discover
-
 
 from typing import Dict
 
