@@ -53,7 +53,7 @@ async def discover_devices(timeout=5,adapter="hci0", force_disconnect = True):
     await scanner.start()
     await asyncio.sleep(timeout)
     await scanner.stop()
-    DISCOVERED_DEVICES_CACHE = scanner.get_discovered_devices()
+    DISCOVERED_DEVICES_CACHE = scanner.discovered_devices
     return DISCOVERED_DEVICES_CACHE
 
 async def force_device_disconnect(address):
