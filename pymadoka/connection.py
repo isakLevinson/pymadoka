@@ -49,13 +49,14 @@ async def discover_devices(timeout=5, adapter="hci0", force_disconnect = True):
     """
     global DISCOVERED_DEVICES_CACHE
 
-    logger.debug("discover_devices adapter:%s", adapter)
+    logger.debug("discover_devices adapter:%s timeout:%d", adapter, timeout)
 
     scanner = BleakScanner(adapter = adapter)
     await scanner.start()
     await asyncio.sleep(timeout)
     await scanner.stop()
     DISCOVERED_DEVICES_CACHE = scanner.discovered_devices
+    logger.debug("discover_devices adapter discovered:", DISCOVERED_DEVICES_CACHE)
     return DISCOVERED_DEVICES_CACHE
 
 async def force_device_disconnect(address):
@@ -147,7 +148,7 @@ class Connection(TransportDelegate):
             force_disconnect (bool): Force a hard disconnect of the device. The device is usually disconnected to ensure a better communication (default True)
             device_discovery_timeout(int): Timeout used for the device discovery (default 5s)
         """
-        logger.debug(F"Starting connection manager on {self.address}")
+        logger.debug(F"Starting connection manager on {self.address} {self.adapter}")
         self.connection_status = ConnectionStatus.CONNECTING
         while (not self.connection_status == ConnectionStatus.CONNECTED and 
                not self.connection_status == ConnectionStatus.ABORTED):
