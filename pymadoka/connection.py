@@ -38,7 +38,7 @@ class ConnectionStatus(Enum):
 
 DISCOVERED_DEVICES_CACHE = []
 
-async def discover_devices(timeout=5,adapter="hci0", force_disconnect = True):
+async def discover_devices(timeout=5, adapter="hci0", force_disconnect = True):
     """Trigger a bluetooth devices discovery on the adapter for the timeout interval.
     
     This method must be called before any connection attempt.
@@ -48,6 +48,8 @@ async def discover_devices(timeout=5,adapter="hci0", force_disconnect = True):
         adapter (str): Bluetooth adapter
     """
     global DISCOVERED_DEVICES_CACHE
+
+    logger.debug("discover_devices adapter:%s", adapter)
 
     scanner = BleakScanner(adapter = adapter)
     await scanner.start()
