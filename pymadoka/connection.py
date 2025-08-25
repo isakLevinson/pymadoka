@@ -209,6 +209,8 @@ class Connection(TransportDelegate):
             sender (str) : Client ID
             data (bytearray): Data to be rebuilt
         """
+
+        logger.info(f"notification_handler: ({len(data)}){bytes(data).hex()}")
         self.transport.rebuild_chunk(data)
        
     def cmd_id_to_bytes(self,cmd_id:int):
@@ -228,6 +230,7 @@ class Connection(TransportDelegate):
             Future: Callers of this methods must await this Future to receive the result of the command execution
         """
 
+
         cmd_response = asyncio.get_event_loop().create_future()
         if not cmd_id in self.requests:
             self.requests[cmd_id] = []
@@ -243,7 +246,8 @@ class Connection(TransportDelegate):
 
         payload[0] = len(payload)
 
-        logger.debug(f"Sending cmd payload: {bytes(payload).hex()}")
+        logger.info(f"###############################")
+        logger.debug(f"Sending cmd payload: (id:{cmd_id:x}) ({len(payload):x}){bytes(payload).hex()}")
        
         chunks = self.transport.split_in_chunks(payload)
         sent = 0
@@ -283,6 +287,7 @@ class Connection(TransportDelegate):
             return
 
         cmd_id = self.bytes_to_cmd_id(data)
+        logger.info(f"response_rebuild (id:{cmd_id:x}) ({len(data):x}){bytes(data).hex()}")
 
         if not cmd_id in self.requests:
             return

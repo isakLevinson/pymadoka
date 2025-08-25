@@ -91,6 +91,7 @@ class Transport:
         Args:
             chunk (bytearray): The chunk data to be processed
         """
+
         if len(chunk) < 2:
             logger.info(F"Chunk received but discarded due to not enough data ({len(chunk)} bytes)")
             return
@@ -102,13 +103,10 @@ class Transport:
             out = self.chunks_data()
             self.delegate.response_failed(out)
 
-
         self.last_id = chunk[0]
-        
         self.chunks.append(chunk)
         
         if self.is_message_complete(): 
-
             logger.debug("Message complete. Processing...")
             out = self.chunks_data()
             self.last_id = None

@@ -4,6 +4,9 @@
 from typing import Dict
 from pymadoka.feature import Feature, FeatureStatus, NotImplementedException
 from pymadoka.connection import Connection
+import logging                                    
+
+logger = logging.getLogger(__name__)
 
 class TemperaturesStatus(FeatureStatus):
 
@@ -41,6 +44,8 @@ class TemperaturesStatus(FeatureStatus):
         values[self.INDOOR_IDX] = (self.indoor*128).to_bytes(2,"big")
         if self.outdoor is not None:
             values[self.OUTDOOR_IDX] = (self.outdoor*128).to_bytes(2,"big")
+
+        logger.info(f"TemperaturesStatus get_values: {values}")
         return values
 
 class Temperatures(Feature):

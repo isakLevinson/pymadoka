@@ -26,6 +26,7 @@ import threading
 import time
 
 logger = logging.getLogger(__name__)
+logging.getLogger("pymadoka").setLevel(logging.DEBUG)
 
 class LoadingThread(threading.Thread):
     

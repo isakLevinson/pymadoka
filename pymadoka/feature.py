@@ -49,17 +49,17 @@ class FeatureStatus(ABC):
         ParseException: There is missing data or there is a data mismatch
     """
     def parse(self,data:bytearray):
-
         if len(data)<4:
             raise ParseException("Not enough bytes to parse")
 
         if data[0] != len(data):
             raise ParseException("Message size and data size mismatchs")
 
-
         # We have already skipped chunk_id(1byte)
         # We process the following data: size(1),cmd_id(3),param_id(1),param_size(1),param_value...
-     
+    
+        cmd_id = data[3]
+
         values = {}
         value_size = 0
         i = 4
@@ -83,6 +83,7 @@ class FeatureStatus(ABC):
 
             i += 2 + value_size
         
+        logger.info(f"parse: (id:{cmd_id:x}) {values}")
         self.set_values(values)
 
 
@@ -97,9 +98,12 @@ class FeatureStatus(ABC):
 
         values = self.get_values()
     
+#        logger.info(f"serialize: {values:x}")
+
         out = bytearray()
 
         for k,v in values.items():
+            logger.info(f"serialize k:{k:x} v:{v}")
             out.append(k)
             out.append(len(v))
             out.extend(v)
@@ -108,6 +112,9 @@ class FeatureStatus(ABC):
 
         if len(out) == 0:
             out = bytearray([0x00,0x00])
+            logger.info(f"serialize: empty out")
+
+#        logger.info(f"serialize: {bytes(out).hex()}")
 
         return out
             
@@ -180,15 +187,15 @@ class Feature(ABC):
 
         cmd_id = self.query_cmd_id()
         try:
-            
-           
              new_status = self.new_status()
-             response = await self.connection.send(cmd_id, new_status.serialize())
+             txData = new_status.serialize()
+             logger.info(f"query sending (id:{cmd_id:x}) ({len(txData):x}){bytes(txData).hex()}")
+             response = await self.connection.send(cmd_id, txData)
              await response
              result = response.result()
-             logger.debug(f"{self.__class__.__name__} QUERY response received ({len(result)} bytes)")
+             logger.debug(f"QUERY response received ({len(result):x}){bytes(result).hex()}")
              new_status.parse(result)
-             logger.debug(f"{self.__class__.__name__} status updated, new value:\n{json.dumps(vars(new_status), default = str)}")
+             logger.debug(f"status updated, new value:\n{json.dumps(vars(new_status), default = str)}")
              self.status = new_status
              return self.status             
         except CancelledError as e:
@@ -244,15 +251,17 @@ class Feature(ABC):
 
         cmd_id = self.update_cmd_id()
         try:
-             response = await self.connection.send(cmd_id, update_status.serialize())
-             await response
-             result = response.result()
-             logger.debug(f"{self.__class__.__name__} UPDATE response received ({len(result)} bytes)")
-             response_status = self.new_status()
-             response_status.parse(result)
-             logger.debug(f"{self.__class__.__name__} status updated, new value:\n{json.dumps(vars(response_status), default = str)}")
-             self.status = update_status
-             return self.status
+            logger.info(f"update: {update_status.serialize()}") 
+            response = await self.connection.send(cmd_id, update_status.serialize())
+            await response
+            result = response.result()
+            logger.debug(f"{self.__class__.__name__} UPDATE response received ({len(result)} bytes)")
+            response_status = self.new_status()
+            response_status.parse(result)
+            logger.debug(f"{self.__class__.__name__} status updated, new value:\n{json.dumps(vars(response_status), default = str)}")
+            self.status = update_status
+            return self.status
+
         except CancelledError as e:
             if cmd_id in self.connection.requests:
                 if len(self.connection.requests[cmd_id])>0:

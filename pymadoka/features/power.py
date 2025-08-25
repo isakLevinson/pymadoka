@@ -4,6 +4,9 @@
 from typing import Dict
 from pymadoka.feature import Feature, FeatureStatus
 from pymadoka.connection import Connection
+import logging                                    
+
+logger = logging.getLogger(__name__)
 
 class PowerStateStatus(FeatureStatus):
 
@@ -27,12 +30,15 @@ class PowerStateStatus(FeatureStatus):
     
     def set_values(self, values:Dict[str,bytearray]):
         """See base class."""
+
+        logger.info(f"Power set_values: {values}")
         self.turn_on = values[self.DATA_IDX][0] == 0x01
         
-    def get_values(self) -> Dict[str,bytearray]:
+    def get_values(self) -> Dict[str, bytearray]:
         """See base class."""
         values = {}
         values[self.DATA_IDX] = bytes([0x01]) if self.turn_on else bytes([0x00])
+        logger.info(f"power get_values: {values}")
         return values
 
 class PowerState(Feature):
@@ -58,4 +64,7 @@ class PowerState(Feature):
 
     def new_status(self) -> FeatureStatus:
         """See base class."""
-        return PowerStateStatus(False)
+        ret = PowerStateStatus(False)
+        logger.info(f"PowerStateStatus get_status {ret}")
+
+        return ret
