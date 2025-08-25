@@ -105,7 +105,6 @@ def cli(ctx,verbose,clean,adapter,log_output,debug,address,force_disconnect, dev
     
     ctx.obj = {}
     ctx.obj["madoka"] = madoka
-    ctx.obj["loop"] = asyncio.get_event_loop()   
     ctx.obj["format"] = format
     ctx.obj["timeout"] = device_discovery_timeout
     ctx.obj["adapter"] = adapter
@@ -236,5 +235,5 @@ async def get_info(obj):
     
 
 if __name__ == "__main__":  
-    asyncio.get_event_loop().run_until_complete(cli())
+    asyncio.run(cli())
    

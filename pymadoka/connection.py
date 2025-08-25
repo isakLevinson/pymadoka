@@ -56,7 +56,7 @@ async def discover_devices(timeout=5, adapter="hci0", force_disconnect = True):
     await asyncio.sleep(timeout)
     await scanner.stop()
     DISCOVERED_DEVICES_CACHE = scanner.discovered_devices
-    logger.debug("discover_devices adapter discovered:", DISCOVERED_DEVICES_CACHE)
+    logger.debug(f"discover_devices adapter discovered: {DISCOVERED_DEVICES_CACHE}")
     return DISCOVERED_DEVICES_CACHE
 
 async def force_device_disconnect(address):
@@ -230,8 +230,7 @@ class Connection(TransportDelegate):
             Future: Callers of this methods must await this Future to receive the result of the command execution
         """
 
-
-        cmd_response = asyncio.get_event_loop().create_future()
+        cmd_response = asyncio.get_running_loop().create_future()
         if not cmd_id in self.requests:
             self.requests[cmd_id] = []
 
